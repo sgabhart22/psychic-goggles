@@ -1,6 +1,7 @@
 package com.sgabhart.gimmeabreak;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,7 +9,13 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,21 +24,54 @@ import org.jsoup.select.Elements;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView display;
+    private ScrollView sv;
+    private Context cx;
+    private PuzzleDbHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         display = (TextView)(findViewById(R.id.text));
+        cx = this;
+        dbHelper = new PuzzleDbHelper(cx);
 
-        new DownloadTask().execute(new UrlBuilder().getWordsUrl());
+        try {
+            ProviderInstaller.installIfNeeded(getApplicationContext());
+        } catch (GooglePlayServicesRepairableException re) {
+            System.err.println(re);
+        } catch (GooglePlayServicesNotAvailableException nae) {
+            System.err.println(nae);
+        }
+
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(null, null, null);
+            SSLEngine engine = sslContext.createSSLEngine();
+        } catch (NoSuchAlgorithmException nsa) {
+            System.err.println(nsa);
+        } catch (KeyManagementException km) {
+            System.err.println(km);
+        }
+
+        if(dbHelper.containsPuzzle()){
+            Toast.makeText(cx, "This puzzle already in database.", Toast.LENGTH_SHORT).show();
+        } else {
+            new DownloadTask().execute(new UrlBuilder().getWordsUrl());
+        }
     }
 
     public void updateView(String s){
@@ -97,8 +137,10 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
+
                 // Cartoon image as byte array
                 byte[] rawBytes = Jsoup.connect(srcUrl).ignoreContentType(true).execute().bodyAsBytes();
+
 
                 // Crop cartoon
                 Bitmap bmp = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length);
@@ -108,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] bytes = os.toByteArray();
 
                 // Put information in db
-                PuzzleDbHelper dbHelper = new PuzzleDbHelper(getApplicationContext());
+                PuzzleDbHelper dbHelper = new PuzzleDbHelper(cx);
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
 
                 ContentValues cv = new ContentValues();
@@ -126,11 +168,13 @@ public class MainActivity extends AppCompatActivity {
                 cv.put(PuzzleContract.DailyPuzzle.IMAGE, bytes);
 
                 long newRowId = db.insert(PuzzleContract.DailyPuzzle.TABLE_NAME, null, cv);
-                System.out.println(newRowId);
+                Log.w("New row ID", "" + newRowId);
+
 
             } catch (IOException e){
                 System.err.println(e);
             }
+
 
             return answers;
         }
