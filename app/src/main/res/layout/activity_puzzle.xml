@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <android.inputmethodservice.KeyboardView
+        android:id="@+id/keyboard"
+        android:layout_alignParentBottom="true"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:keyTextColor="@color/textColorPrimary"
+        android:keyBackground="@color/transparent"
+        android:background="@color/background_light"
+        android:shadowRadius="0.0"
+        />
+
+    <com.sgabhart.periwinkle.ScrollingImageView
+        android:id="@+id/field"
+        android:layout_above="@id/keyboard"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollbars="horizontal|vertical"
+        android:background="@color/transparent"
+        />
+
+
+</RelativeLayout>
