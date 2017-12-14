@@ -2,13 +2,19 @@ package com.sgabhart.gimmeabreak;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,19 +41,39 @@ import javax.net.ssl.SSLEngine;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView display;
     private ScrollView sv;
     private Context cx;
     private PuzzleDbHelper dbHelper;
+    private int buttonWidth, buttonHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        display = (TextView)(findViewById(R.id.text));
         cx = this;
         dbHelper = new PuzzleDbHelper(cx);
+        sv = (ScrollView)(findViewById(R.id.scrollView));
+
+        Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        buttonWidth = size.x;
+        buttonHeight = size.y / 10;
+        updateView();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dbHelper.containsPuzzle()){
+                    Toast.makeText(cx, "This puzzle already in database.", Toast.LENGTH_SHORT).show();
+                } else {
+                    new DownloadTask().execute(new UrlBuilder().getWordsUrl());
+                }
+            }
+        });
 
         try {
             ProviderInstaller.installIfNeeded(getApplicationContext());
@@ -66,16 +92,53 @@ public class MainActivity extends AppCompatActivity {
         } catch (KeyManagementException km) {
             System.err.println(km);
         }
+    }
 
-        if(dbHelper.containsPuzzle()){
-            Toast.makeText(cx, "This puzzle already in database.", Toast.LENGTH_SHORT).show();
+    public void updateView(){
+        ArrayList<Puzzle> puzzles = dbHelper.selectAll();
+        Log.w("updateView: ", "Puzzles in db " + puzzles.size());
+        if(puzzles.size() > 0){
+            sv.removeAllViewsInLayout();
+
+            GridLayout grid = new GridLayout(this);
+            grid.setRowCount((puzzles.size()));
+            grid.setColumnCount(1);
+
+            PuzzleButton[] buttons = new PuzzleButton[puzzles.size()];
+            ButtonHandler bh = new ButtonHandler();
+
+            int i = 0;
+
+            for (Puzzle p:
+                    puzzles) {
+                buttons[i] = new PuzzleButton(this, p);
+                buttons[i].setText(p.getId() + "\n" + p.getDate());
+
+                buttons[i].setOnClickListener(bh);
+
+                grid.addView(buttons[i], buttonWidth,
+                        buttonHeight);
+                i++;
+            }
+
+            sv.addView(grid);
         } else {
-            new DownloadTask().execute(new UrlBuilder().getWordsUrl());
+            sv.removeAllViewsInLayout();
         }
     }
 
-    public void updateView(String s){
-        display.setText(s);
+    public void startPuzzle(int id){
+        Intent puzzleIntent = new Intent(this, PuzzleActivity.class);
+        puzzleIntent.putExtra("id", id);
+        startActivity(puzzleIntent);
+    }
+
+    private  class ButtonHandler implements View.OnClickListener{
+        public void onClick(View v){
+            int id = ((PuzzleButton) v).getId();
+
+            startPuzzle(id);
+        }
     }
 
     private class DownloadTask extends AsyncTask<String, Void, ArrayList<String>>{
@@ -181,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<String> answers){
-            updateView(answers.get(0));
+            updateView();
         }
     } // DownloadTask
 }

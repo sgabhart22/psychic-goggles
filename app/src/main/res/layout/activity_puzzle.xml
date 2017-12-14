@@ -14,7 +14,7 @@
         android:shadowRadius="0.0"
         />
 
-    <com.sgabhart.periwinkle.ScrollingImageView
+    <com.sgabhart.gimmeabreak.ScrollingImageView
         android:id="@+id/field"
         android:layout_above="@id/keyboard"
         android:layout_width="fill_parent"

@@ -15,7 +15,7 @@ import android.widget.ImageView;
 
 @SuppressWarnings("deprecation")
 public class ScrollingImageView extends FrameLayout implements OnGestureListener {
-    private static final Logger LOG = Logger.getLogger("com.sgabhart.bottlecap");
+    private static final Logger LOG = Logger.getLogger("com.sgabhart.gimmeabreak");
     private AuxTouchHandler aux = null;
     private ClickListener ctxListener;
     private GestureDetector gestureDetector;
