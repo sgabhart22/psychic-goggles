@@ -11,6 +11,8 @@ import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +46,12 @@ public class MainActivity extends AppCompatActivity {
     private ScrollView sv;
     private Context cx;
     private PuzzleDbHelper dbHelper;
-    private int buttonWidth, buttonHeight;
+    // private int buttonWidth, buttonHeight;
+    private ArrayList<Puzzle> puzzles;
+
+    private RecyclerView rv;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager lm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,20 +62,33 @@ public class MainActivity extends AppCompatActivity {
 
         cx = this;
         dbHelper = new PuzzleDbHelper(cx);
-        sv = (ScrollView)(findViewById(R.id.scrollView));
+        puzzles = new ArrayList<>();
+        puzzles = dbHelper.selectAll();
+        // sv = (ScrollView)(findViewById(R.id.scrollView));
+
+        rv = findViewById(R.id.recycle);
+        rv.setHasFixedSize(true);
+
+        lm = new LinearLayoutManager(this);
+        rv.setLayoutManager(lm);
+
+        adapter = new PuzzleAdapter(puzzles);
+        rv.setAdapter(adapter);
+
 
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        buttonWidth = size.x;
-        buttonHeight = size.y / 10;
-        updateView();
+        // buttonWidth = size.x;
+        // buttonHeight = size.y / 10;
+        // updateView();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(dbHelper.containsPuzzle()){
-                    Toast.makeText(cx, "This puzzle already in database.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(cx, "Today's puzzle already downloaded!",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     new DownloadTask().execute(new UrlBuilder().getWordsUrl());
                 }
@@ -94,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
     public void updateView(){
         ArrayList<Puzzle> puzzles = dbHelper.selectAll();
         Log.w("updateView: ", "Puzzles in db " + puzzles.size());
@@ -126,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
             sv.removeAllViewsInLayout();
         }
     }
+    */
 
     public void startPuzzle(int id){
         Intent puzzleIntent = new Intent(this, PuzzleActivity.class);
@@ -133,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(puzzleIntent);
     }
 
+    /*
     private  class ButtonHandler implements View.OnClickListener{
         public void onClick(View v){
             int id = ((PuzzleButton) v).getId();
@@ -140,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
             startPuzzle(id);
         }
     }
+    */
 
     private class DownloadTask extends AsyncTask<String, Void, ArrayList<String>>{
 
@@ -244,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<String> answers){
-            updateView();
+            // updateView();
         }
     } // DownloadTask
 }

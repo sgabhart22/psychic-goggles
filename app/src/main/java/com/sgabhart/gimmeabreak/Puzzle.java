@@ -5,7 +5,11 @@ import android.graphics.Bitmap;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -14,6 +18,7 @@ import java.util.Map;
 public class Puzzle {
     private int id;
     private String date;
+    private String day;
     private ArrayList<String> words, answers;
     private byte[] image;
     private Box[][] boxes;
@@ -90,6 +95,22 @@ public class Puzzle {
     public Box[][] getBoxes(){ return boxes; }
 
     public Box[] getFinalBoxes(){ return finalBoxes; }
+
+    public String getDay() {
+
+        try{
+            Date d = new SimpleDateFormat("yyyy-MM-dd").parse(this.date);
+            return new SimpleDateFormat("EEEE").format(d);
+        } catch (ParseException p) {
+            System.err.println(p);
+        }
+
+        return "Indeterminate Day";
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
 
     private void makeMap(){
         // Create an iterator.
