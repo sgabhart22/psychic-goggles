@@ -32,6 +32,10 @@ public class PuzzleAdapter extends RecyclerView.Adapter<PuzzleAdapter.ViewHolder
         dataset = newDataset;
     } // Constructor
 
+    public void setDataset(ArrayList<Puzzle> dataset) {
+        this.dataset = dataset;
+    }
+
     @Override
     public PuzzleAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         CardView v = (CardView) LayoutInflater.from(parent.getContext()).

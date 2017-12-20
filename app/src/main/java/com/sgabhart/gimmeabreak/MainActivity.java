@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Puzzle> puzzles;
 
     private RecyclerView rv;
-    private RecyclerView.Adapter adapter;
+    private PuzzleAdapter adapter;
     private RecyclerView.LayoutManager lm;
 
     @Override
@@ -66,9 +66,10 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new PuzzleDbHelper(cx);
         puzzles = new ArrayList<>();
         puzzles = dbHelper.selectAll();
-        sv = (ScrollView)(findViewById(R.id.scrollView));
 
-        /*
+        // sv = (ScrollView)(findViewById(R.id.scrollView));
+
+
         rv = findViewById(R.id.recycle);
         rv.setHasFixedSize(true);
 
@@ -77,13 +78,14 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new PuzzleAdapter(puzzles);
         rv.setAdapter(adapter);
-        */
 
+        /*
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         buttonWidth = size.x;
         buttonHeight = size.y / 10;
         updateView();
+        */
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -142,39 +144,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     public void updateView(){
-        ArrayList<Puzzle> puzzles = dbHelper.selectAll();
-        Log.w("updateView: ", "Puzzles in db " + puzzles.size());
-        if(puzzles.size() > 0){
-            sv.removeAllViewsInLayout();
-
-            GridLayout grid = new GridLayout(this);
-            grid.setRowCount((puzzles.size()));
-            grid.setColumnCount(1);
-
-            PuzzleButton[] buttons = new PuzzleButton[puzzles.size()];
-            ButtonHandler bh = new ButtonHandler();
-
-            int i = 0;
-
-            for (Puzzle p:
-                    puzzles) {
-                buttons[i] = new PuzzleButton(this, p);
-                buttons[i].setText(p.getId() + "\n" + p.getDate());
-
-                buttons[i].setOnClickListener(bh);
-
-                grid.addView(buttons[i], buttonWidth,
-                        buttonHeight);
-                i++;
-            }
-
-            sv.addView(grid);
-        } else {
-            sv.removeAllViewsInLayout();
-        }
-    }
+        puzzles = dbHelper.selectAll();
+        adapter.setDataset(puzzles);
+        adapter.notifyDataSetChanged();
+    } // updateView
 
 
     public void startPuzzle(int id){
@@ -183,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(puzzleIntent);
     }
 
-
+    /*
     private  class ButtonHandler implements View.OnClickListener{
         public void onClick(View v){
             int id = ((PuzzleButton) v).getId();
@@ -191,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
             startPuzzle(id);
         }
     }
-
+    */
 
     private class DownloadTask extends AsyncTask<String, Void, ArrayList<String>>{
 
