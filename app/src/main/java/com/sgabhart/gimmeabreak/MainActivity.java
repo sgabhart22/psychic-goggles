@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v, int position) {
                 int id = puzzles.get(position).getId();
-                Toast.makeText(cx, "ID of puzzle clicked: " + id, Toast.LENGTH_SHORT).show();
+                startPuzzle(id);
             }
 
             @Override
