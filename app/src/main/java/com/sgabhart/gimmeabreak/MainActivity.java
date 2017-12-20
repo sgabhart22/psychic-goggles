@@ -15,6 +15,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ScrollView;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private ScrollView sv;
     private Context cx;
     private PuzzleDbHelper dbHelper;
-    // private int buttonWidth, buttonHeight;
+    private int buttonWidth, buttonHeight;
     private ArrayList<Puzzle> puzzles;
 
     private RecyclerView rv;
@@ -64,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new PuzzleDbHelper(cx);
         puzzles = new ArrayList<>();
         puzzles = dbHelper.selectAll();
-        // sv = (ScrollView)(findViewById(R.id.scrollView));
+        sv = (ScrollView)(findViewById(R.id.scrollView));
 
+        /*
         rv = findViewById(R.id.recycle);
         rv.setHasFixedSize(true);
 
@@ -74,13 +77,13 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new PuzzleAdapter(puzzles);
         rv.setAdapter(adapter);
-
+        */
 
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        // buttonWidth = size.x;
-        // buttonHeight = size.y / 10;
-        // updateView();
+        buttonWidth = size.x;
+        buttonHeight = size.y / 10;
+        updateView();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -112,9 +115,34 @@ public class MainActivity extends AppCompatActivity {
         } catch (KeyManagementException km) {
             System.err.println(km);
         }
+    } // onCreate
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
-    /*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        switch(item.getItemId()) {
+            case R.id.action_cleanup:
+                dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 1, 1);
+                updateView();
+                return true;
+            case R.id.action_settings:
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
     public void updateView(){
         ArrayList<Puzzle> puzzles = dbHelper.selectAll();
         Log.w("updateView: ", "Puzzles in db " + puzzles.size());
@@ -147,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             sv.removeAllViewsInLayout();
         }
     }
-    */
+
 
     public void startPuzzle(int id){
         Intent puzzleIntent = new Intent(this, PuzzleActivity.class);
@@ -155,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(puzzleIntent);
     }
 
-    /*
+
     private  class ButtonHandler implements View.OnClickListener{
         public void onClick(View v){
             int id = ((PuzzleButton) v).getId();
@@ -163,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
             startPuzzle(id);
         }
     }
-    */
+
 
     private class DownloadTask extends AsyncTask<String, Void, ArrayList<String>>{
 
@@ -268,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<String> answers){
-            // updateView();
+            updateView();
         }
     } // DownloadTask
 }
