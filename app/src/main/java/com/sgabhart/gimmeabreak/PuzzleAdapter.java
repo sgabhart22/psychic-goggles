@@ -1,5 +1,6 @@
 package com.sgabhart.gimmeabreak;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 
 public class PuzzleAdapter extends RecyclerView.Adapter<PuzzleAdapter.ViewHolder> {
     private ArrayList<Puzzle> dataset = new ArrayList<>();
+    private Context cx;
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         public CardView cv;
@@ -26,6 +28,8 @@ public class PuzzleAdapter extends RecyclerView.Adapter<PuzzleAdapter.ViewHolder
             super(v);
             cv = v;
         }
+
+
     } // ViewHolder
 
     public PuzzleAdapter(ArrayList<Puzzle> newDataset){
@@ -48,12 +52,6 @@ public class PuzzleAdapter extends RecyclerView.Adapter<PuzzleAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position){
         RelativeLayout rl = (RelativeLayout)holder.cv.getChildAt(0);
-        rl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                
-            }
-        });
 
         TextView tvDay = (TextView)rl.getChildAt(0);
         TextView tvDate = (TextView)rl.getChildAt(1);

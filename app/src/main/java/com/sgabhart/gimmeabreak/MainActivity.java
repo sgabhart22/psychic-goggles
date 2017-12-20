@@ -15,8 +15,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ScrollView;
@@ -46,7 +48,6 @@ import javax.net.ssl.SSLEngine;
 public class MainActivity extends AppCompatActivity {
 
     private ScrollView sv;
-    private Context cx;
     private PuzzleDbHelper dbHelper;
     private int buttonWidth, buttonHeight;
     private ArrayList<Puzzle> puzzles;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rv;
     private PuzzleAdapter adapter;
     private RecyclerView.LayoutManager lm;
+    private Context cx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,21 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new PuzzleAdapter(puzzles);
         rv.setAdapter(adapter);
+
+        rv.addOnItemTouchListener(new RecyclerTouchListener(this, rv, new ClickListener() {
+            @Override
+            public void onClick(View v, int position) {
+                int id = puzzles.get(position).getId();
+                Toast.makeText(cx, "ID of puzzle clicked: " + id, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLongClick(View v, int position) {
+                int id = puzzles.get(position).getId();
+                Toast.makeText(cx, "ID of puzzle LONG clicked: " + id,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }));
 
         /*
         Point size = new Point();
@@ -166,6 +183,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     */
+
+    public static interface ClickListener{
+        public void onClick(View v, int position);
+        public void onLongClick(View v, int position);
+    } // ClickListener
+
+    class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
+        private ClickListener cl;
+        private GestureDetector gd;
+
+        public RecyclerTouchListener(Context cx, final RecyclerView rv, final ClickListener cl){
+            this.cl = cl;
+            gd = new GestureDetector(cx, new GestureDetector.SimpleOnGestureListener(){
+                @Override
+                public boolean onSingleTapUp(MotionEvent e){
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e){
+                    View child = rv.findChildViewUnder(e.getX(), e.getY());
+                    if(child != null && cl != null){
+                        cl.onLongClick(child, rv.getChildAdapterPosition(child));
+                    }
+                }
+            });
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e){
+            View child = rv.findChildViewUnder(e.getX(), e.getY());
+
+            if(child != null && cl != null && gd.onTouchEvent(e)){
+                cl.onClick(child, rv.getChildAdapterPosition(child));
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView rv, MotionEvent e){}
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept){}
+
+    } // RecyclerTouchListener
 
     private class DownloadTask extends AsyncTask<String, Void, ArrayList<String>>{
 
