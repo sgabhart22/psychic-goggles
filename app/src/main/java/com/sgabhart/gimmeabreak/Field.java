@@ -152,7 +152,7 @@ public class Field implements Serializable{
             finalBoxes[i].setCircled(true);
 
             char testChar = finalBoxes[i].getSolution();
-            if(testChar == '"' || testChar == '-' || testChar == ' '){
+            if(testChar == '\'' || testChar == '-' || testChar == ' '){
                 finalBoxes[i].setLocked(true);
             }
 
@@ -226,9 +226,11 @@ public class Field implements Serializable{
                 canvas.drawRect(r, correctPaint);
             }
 
-            if(b.getSolution() == '"'){
+            // Determine non-letter characters in final answer
+            if(b.getSolution() == '\''){
                 canvas.drawText("\"", r.exactCenterX(),
                         r.exactCenterY(), textPaint);
+                i++;
             } else if(b.getSolution() == '-'){
                 canvas.drawText("-", r.exactCenterX(),
                         r.exactCenterY() + 10.0f, textPaint);
