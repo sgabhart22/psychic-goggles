@@ -139,6 +139,11 @@ public class Field implements Serializable{
         } // for
 
         String finalAnswer = answers.get(answers.size() - 1);
+
+        // Format answer if need be
+        if(finalAnswer.contains("\'\'")){
+            finalAnswer = finalAnswer.replaceAll("\'\'", "\"");
+        }
         finalBoxes = new Box[finalAnswer.length()];
 
         // Finally, for the final answer boxes
@@ -152,7 +157,7 @@ public class Field implements Serializable{
             finalBoxes[i].setCircled(true);
 
             char testChar = finalBoxes[i].getSolution();
-            if(testChar == '\'' || testChar == '-' || testChar == ' '){
+            if(testChar == '\"' || testChar == '-' || testChar == ' '){
                 finalBoxes[i].setLocked(true);
             }
 
@@ -227,10 +232,9 @@ public class Field implements Serializable{
             }
 
             // Determine non-letter characters in final answer
-            if(b.getSolution() == '\''){
+            if(b.getSolution() == '\"'){
                 canvas.drawText("\"", r.exactCenterX(),
                         r.exactCenterY(), textPaint);
-                i++;
             } else if(b.getSolution() == '-'){
                 canvas.drawText("-", r.exactCenterX(),
                         r.exactCenterY() + 10.0f, textPaint);
@@ -251,7 +255,7 @@ public class Field implements Serializable{
         canvas.drawBitmap(cartoon, null, imageRect, new Paint());
 
         return bitmap;
-    }
+    } // draw
 
     public Box findBox(int x, int y){
         Box box;
